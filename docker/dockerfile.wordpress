@@ -1,0 +1,26 @@
+FROM ubuntu:latest
+
+ENV TZ=Europe/Paris
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# Installation des paquets nécessaires
+RUN apt-get update && \
+    apt-get -y upgrade && \
+    apt-get -y install apache2 php libapache2-mod-php php-mysql curl && \
+    curl -O https://wordpress.org/latest.tar.gz && \
+    tar -xzf latest.tar.gz -C /var/www/html --strip-components=1 && \
+    chown -R www-data:www-data /var/www/html && \
+    rm latest.tar.gz && \
+    rm /var/www/html/index.html
+
+# Copie du fichier de configuration de WordPress
+COPY config/wp-config.php /var/www/html/wp-config.php
+
+# Ajout de la directive ServerName à la fin de apache2.conf
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
+
+# Exposition du port 80
+EXPOSE 80
+
+# Démarrage d'Apache en premier plan
+CMD ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]
