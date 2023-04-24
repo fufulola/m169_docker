@@ -8,9 +8,7 @@ COPY source/apache2 /apache2
 COPY source/php8.2.5 /php8.2.5
 
 # Installer les dépendances pour WordPress
-RUN /php8.2.5/bin/php -r "copy('https://wordpress.org/latest.tar.gz', '/tmp/wordpress.tar.gz');"
-RUN tar -xzf /tmp/wordpress.tar.gz -C /var/www/localhost/htdocs/
-RUN rm /tmp/wordpress.tar.gz
+COPY source/wordpress /var/www/localhost/htdocs/
 RUN chown -R www-data:www-data /var/www/localhost/htdocs/wordpress/
 
 # Copier les fichiers de configuration Apache dans le conteneur
