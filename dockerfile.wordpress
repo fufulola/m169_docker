@@ -1,6 +1,9 @@
 # utiliser l'image officielle de scratch
 FROM scratch
 
+# Ajouter le système de fichiers de base de alpinelinux
+ADD rootfs.tar.gz /
+
 # Copiez le binaire d'Apache dans le conteneur
 COPY source/apache2 /apache2
 
