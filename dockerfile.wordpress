@@ -30,4 +30,4 @@ EXPOSE 80
 # Démarrer Apache en tant que processus principal du conteneur
 CMD ["/apache2", "-f", "/etc/apache2/httpd.conf", "-D", "FOREGROUND"]
 
-echo "Le conteneur MySQL est en cours de démarrage..."
+echo "Le conteneur Wordpress est en cours de démarrage..."
