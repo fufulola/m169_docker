@@ -1,11 +1,11 @@
-# On va créer un dockerfile de rien
+# utiliser l'image officielle de scratch
 FROM scratch
 
 # Copiez le binaire d'Apache dans le conteneur
 COPY sources/apache2 /apache2
 
 # Copiez le binaire de PHP dans le conteneur
-COPY sources/php7 /php7
+COPY sources/php8.2.5 /php8.2.5
 
 # Créer un répertoire pour stocker les fichiers de configuration Apache
 RUN mkdir /etc/apache2
