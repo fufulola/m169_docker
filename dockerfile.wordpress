@@ -6,7 +6,7 @@ ADD source/alpine-minirootfs-3.14.2-x86_64.tar.gz /
 
 # Installer les paquets nécessaires pour PHP et Apache
 RUN apk update && \
-    apk add --no-cache apache2 php8 php8-apache2 php8-mysqli php8-curl php8-gd php8-json php8-mbstring php8-openssl php8-session php8-simplexml php8-xml php8-zip && \
+    apk add --no-cache apache2 apache2-http2 php8 php8-apache2 php8-mysqli php8-curl php8-gd php8-json php8-mbstring php8-openssl php8-session php8-simplexml php8-xml php8-zip && \
     rm -rf /var/cache/apk/*
 
 # Copier les fichiers de configuration pour Apache et PHP
