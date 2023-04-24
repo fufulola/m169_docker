@@ -2,13 +2,16 @@
 FROM scratch
 
 # Copiez le binaire d'Apache dans le conteneur
-COPY sources/apache2 /apache2
+COPY source/apache2 /apache2
 
 # Copiez le binaire de PHP dans le conteneur
-COPY sources/php8.2.5 /php8.2.5
+COPY source/php8.2.5 /php8.2.5
 
-# Créer un répertoire pour stocker les fichiers de configuration Apache
-RUN mkdir /etc/apache2
+# Installer les dépendances pour WordPress
+RUN /php8.2.5/bin/php -r "copy('https://wordpress.org/latest.tar.gz', '/tmp/wordpress.tar.gz');"
+RUN tar -xzf /tmp/wordpress.tar.gz -C /var/www/localhost/htdocs/
+RUN rm /tmp/wordpress.tar.gz
+RUN chown -R www-data:www-data /var/www/localhost/htdocs/wordpress/
 
 # Copier les fichiers de configuration Apache dans le conteneur
 COPY config/httpd.conf /etc/apache2/httpd.conf
