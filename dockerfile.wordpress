@@ -1,33 +1,29 @@
-# utiliser l'image officielle de scratch
+# Utiliser l'image officielle de scratch comme base
 FROM scratch
 
-# Ajouter le système de fichiers de base de alpinelinux
-ADD rootfs.tar.gz /
+# Ajouter le système de fichiers de base d'Alpine Linux
+ADD source/alpine-minirootfs-3.14.2-x86_64.tar.gz /
 
-# Copiez le binaire d'Apache dans le conteneur
-COPY source/apache2 /apache2
+# Installer les paquets nécessaires pour PHP et Apache
+RUN apk update && \
+    apk add --no-cache apache2 php8 php8-apache2 php8-mysqli php8-curl php8-gd php8-json php8-mbstring php8-openssl php8-session php8-simplexml php8-xml php8-zip && \
+    rm -rf /var/cache/apk/*
 
-# Copiez le binaire de PHP dans le conteneur
-COPY source/php8.2.5 /php8.2.5
-
-# Installer les dépendances pour WordPress
-COPY source/wordpress /var/www/localhost/htdocs/
-RUN chown -R www-data:www-data /var/www/localhost/htdocs/wordpress/
-
-# Copier les fichiers de configuration Apache dans le conteneur
+# Copier les fichiers de configuration pour Apache et PHP
 COPY config/httpd.conf /etc/apache2/httpd.conf
+COPY config/php.ini /etc/php8/php.ini
 
-# Créer un répertoire pour stocker les fichiers du site WordPress 
-RUN mkdir /var/www/localhost/htdocs
+# Télécharger et installer WordPress
+ADD https://wordpress.org/latest.tar.gz /var/www/localhost/htdocs/
+RUN tar -xzvf /var/www/localhost/htdocs/latest.tar.gz -C /var/www/localhost/htdocs --strip-components=1 && \
+    rm /var/www/localhost/htdocs/latest.tar.gz
 
-# Copier les fichiers de WordPress dans le conteneur
-COPY config/wp-config.php /var/www/localhost/htdocs/wp-config.php
-COPY config/index.php /var/www/localhost/htdocs/index.php
+# Définir les permissions pour les fichiers WordPress
+RUN chown -R apache:apache /var/www/localhost/htdocs/ && \
+    chmod -R 755 /var/www/localhost/htdocs/
 
 # Exposer le port 80 pour accéder au site WordPress
 EXPOSE 80
 
 # Démarrer Apache en tant que processus principal du conteneur
-CMD ["/apache2", "-f", "/etc/apache2/httpd.conf", "-D", "FOREGROUND"]
-
-echo "Le conteneur Wordpress est en cours de démarrage..."
+CMD ["/usr/sbin/httpd", "-D", "FOREGROUND"]
