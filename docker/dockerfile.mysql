@@ -1,4 +1,0 @@
-FROM mysql:5.7
-
-# Copie du fichier de configuration de MySQL
-COPY config/mysqld.cnf /etc/mysql/mysql.conf.d/mysqld.cnf
