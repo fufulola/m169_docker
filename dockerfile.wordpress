@@ -34,8 +34,14 @@ RUN tar -xzvf /var/www/localhost/htdocs/latest.tar.gz -C /var/www/localhost/htdo
 RUN chown -R apache:apache /var/www/localhost/htdocs/ && \
     chmod -R 755 /var/www/localhost/htdocs/
 
+RUN chown apache:apache /var/run/apache2 /var/log/apache2
+RUN chmod 755 /var/run/apache2 /var/log/apache2
+
 # Exposer le port 80 pour accéder au site WordPress
 EXPOSE 80
+
+# Définir un utilisateur et un groupe pour exécuter les commandes
+USER apache:apache
 
 # Démarrer Apache en tant que processus principal du conteneur
 CMD ["/usr/sbin/httpd", "-D", "FOREGROUND"]
