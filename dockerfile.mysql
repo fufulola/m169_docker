@@ -1,4 +1,20 @@
-FROM mysql:5.7
+# Utilisez une image from scratch
+FROM scratch
 
-# Copie du fichier de configuration de MySQL
-COPY config/mysqld.cnf /etc/mysql/mysql.conf.d/mysqld.cnf
+# Copiez le binaire de MySQL dans le conteneur
+COPY sources/mysql /mysql
+
+# Créer un répertoire pour stocker les données de la base de données MySQL
+RUN mkdir /var/lib/mysql
+
+# Copier le script de démarrage MySQL dans le conteneur
+COPY start-mysql.sh /start-mysql.sh
+RUN chmod 755 /start-mysql.sh
+
+# Exposer le port 3306 pour accéder à la base de données MySQL
+EXPOSE 3306
+
+# Démarrer le script de démarrage MySQL en tant que processus principal du conteneur
+CMD ["/start-mysql.sh"]
+
+echo "Le conteneur MySQL est en cours de démarrage..."
