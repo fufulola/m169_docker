@@ -1,20 +1,20 @@
-# Utilisez une image from scratch
+# Utiliser l'image officielle de scratch comme base
 FROM scratch
 
-# Copiez le binaire de MySQL dans le conteneur
-COPY sources/mysql /mysql
+# Télécharger le binaire MySQL Server à partir du site officiel et le décompresser
+ADD https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-8.0.28-linux-glibc2.17-x86_64-minimal.tar.xz /
+RUN tar -xJf mysql-8.0.28-linux-glibc2.17-x86_64-minimal.tar.xz && \
+    rm mysql-8.0.28-linux-glibc2.17-x86_64-minimal.tar.xz && \
+    mv mysql-8.0.28-linux-glibc2.17-x86_64-minimal mysql
 
-# Créer un répertoire pour stocker les données de la base de données MySQL
-RUN mkdir /var/lib/mysql
+# Ajouter les fichiers de configuration MySQL
+COPY config/mysql/my.cnf /etc/my.cnf
 
-# Copier le script de démarrage MySQL dans le conteneur
-COPY start-mysql.sh /start-mysql.sh
-RUN chmod 755 /start-mysql.sh
-
-# Exposer le port 3306 pour accéder à la base de données MySQL
+# Exposer le port 3306 pour permettre aux autres conteneurs de se connecter
 EXPOSE 3306
 
-# Démarrer le script de démarrage MySQL en tant que processus principal du conteneur
-CMD ["/start-mysql.sh"]
+# Définir un utilisateur et un groupe pour exécuter les commandes
+USER nobody:nobody
 
-echo "Le conteneur MySQL est en cours de démarrage..."
+# Démarrer le serveur MySQL en tant que processus principal du conteneur
+CMD ["/mysql/bin/mysqld"]
