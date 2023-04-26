@@ -6,23 +6,19 @@ ADD source/alpine-minirootfs-3.15.2-x86_64.tar.gz /
 
 # Installer les paquets nécessaires pour PHP et Apache
 RUN apk update && \
-    apk add --no-cache openssl apache2 apache2-ssl apache2-http2 php8 php8-apache2 php8-mysqli php8-curl php8-gd php8-json php8-mbstring php8-openssl php8-session php8-simplexml php8-xml php8-zip && \
+    apk add --no-cache apache2 apache2-utils apache2-ssl apache2-http2 php8 php8-apache2 php8-mysqli php8-curl php8-gd php8-json php8-mbstring php8-openssl php8-session php8-simplexml php8-xml php8-zip && \
     rm -rf /var/cache/apk/*
 
-# Copier les fichiers de configuration pour Apache et PHP
+# Copier les fichiers de configuration pour Apache, PHP et WordPress
 COPY config/httpd.conf /etc/apache2/httpd.conf
 COPY config/php.ini /etc/php8/php.ini
+# COPY config/wp-config.php /var/www/html/wp-config.php
 
 # Créer le répertoire manquant pour la clé privée
 RUN mkdir -p /etc/ssl/private
 
-# Générer un nouveau certificat auto-signé
-RUN openssl req -newkey rsa:4096 -nodes -keyout /etc/ssl/private/server.key -x509 -days 365 -out /etc/ssl/certs/server.crt -subj "/C=US/ST=California/L=San Francisco/O=My Organization/OU=My Unit/CN=mydomain.com"
-
-# Copier le certificat auto-signé dans le répertoire /etc/ssl/certs/
+# Copier la clé privée et le certificat auto-signé dans les répertoires correspondants
 COPY config/server.crt /etc/ssl/certs/
-
-# Copier la clé privée dans le répertoire /etc/ssl/private/
 COPY config/server.key /etc/ssl/private/
 
 # Télécharger et installer WordPress
@@ -34,14 +30,20 @@ RUN tar -xzvf /var/www/localhost/htdocs/latest.tar.gz -C /var/www/localhost/htdo
 RUN chown -R apache:apache /var/www/localhost/htdocs/ && \
     chmod -R 755 /var/www/localhost/htdocs/
 
-RUN chown apache:apache /var/run/apache2 /var/log/apache2
-RUN chmod 755 /var/run/apache2 /var/log/apache2
+# Définir les permissions pour les fichiers de log et de pid d'Apache
+RUN chown -R apache:apache /var/run/apache2 /var/log/apache2 && \
+    chmod 755 /var/run/apache2 /var/log/apache2
 
-# Exposer le port 80 pour accéder au site WordPress
+# Ajouter le script de démarrage personnalisé
+COPY scripts/start-wordpress.sh /usr/local/bin/start-wordpress.sh
+RUN chmod +x /usr/local/bin/start-wordpress.sh
+
+# Exposer le port 80 et 443 pour accéder au site WordPress
 EXPOSE 80
+EXPOSE 443
 
 # Définir un utilisateur et un groupe pour exécuter les commandes
 USER apache:apache
 
 # Démarrer Apache en tant que processus principal du conteneur
-CMD ["/usr/sbin/httpd", "-D", "FOREGROUND"]
+CMD ["/usr/local/bin/start-wordpress.sh"]
