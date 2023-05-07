@@ -6,7 +6,7 @@ ADD source/alpine-minirootfs-3.15.2-x86_64.tar.gz /
 
 # Installer les paquets nécessaires pour PHP et Apache
 RUN apk update && \
-    apk add --no-cache apache2 apache2-utils apache2-ssl apache2-http2 php8 php8-apache2 php8-mysqli php8-curl php8-gd php8-json php8-mbstring php8-openssl php8-session php8-simplexml php8-xml php8-zip && \
+    apk add --no-cache apache2 apache2-utils apache2-ssl apache2-http2 apache2-proxy php8 php8-apache2 php8-mysqli php8-curl php8-gd php8-json php8-mbstring php8-openssl php8-session php8-simplexml php8-xml php8-zip && \
     rm -rf /var/cache/apk/*
 
 # Copier les fichiers de configuration pour Apache, PHP et WordPress
@@ -46,4 +46,4 @@ EXPOSE 443
 USER apache:apache
 
 # Démarrer Apache en tant que processus principal du conteneur
-CMD ["/usr/local/bin/start-wordpress.sh"]
+CMD ["sh", "/usr/local/bin/start-wordpress.sh"]
