@@ -1,0 +1,42 @@
+version: "3"
+services:
+  mysql:
+    build:
+      context: .
+      dockerfile: Dockerfilemysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: myuser
+      MYSQL_PASSWORD: mypassword
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - my-network
+
+  wordpress:
+    build:
+      context: .
+      dockerfile: Dockerfilewp
+    environment:
+      WORDPRESS_DB_HOST: mysql
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+    ports:
+      - "80:80"
+    depends_on:
+      - mysql
+    volumes:
+      - wordpress_data:/var/www/html
+    networks:
+      - my-network
+
+volumes:
+  mysql_data:
+  wordpress_data:
+
+networks:
+  my-network:

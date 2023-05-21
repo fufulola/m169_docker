@@ -1,30 +1,11 @@
-# Utilisez une image from scratch
-FROM scratch
+# Utilisez l'image officielle de MySQL
+FROM mysql:latest
 
-# Rajouter le système de fichier de base d'Alpine Linux
-ADD sources/alpine-minirootfs-3.15.2-x86_64.tar.gz /
+# Copier le fichier init.sql dans le conteneur
+COPY config/init.sql /docker-entrypoint-initdb.d/
 
-# Installer MySQL
-RUN apk update && \
-    apk upgrade && \
-    apk add mysql mysql-client
-
-# Copier les fichiers de configuration (paramétrage MySQL)
-COPY config/my.cnf /etc/mysql/my.cnf
-
-# Copier les fichiers d'initialisation
-COPY config/init.sql /docker-entrypoint-initdb.d/init.sql
-
-# Exposer le port MySQL
-EXPOSE 3306
-
-# Définir les variables d'environnement
-ENV MYSQL_DATABASE=wordpress \
-    MYSQL_USER=wordpress \
-    MYSQL_PASSWORD=wordpress \
-    MYSQL_ROOT_PASSWORD=wordpress
-
-# Démarrer le serveur MySQL
-CMD ["mysqld", "--user=mysql", "--console"]
-
-RUN echo "Le conteneur MySQL est en cours de démarrage..."
+# Définir les variables d'environnement pour la configuration de MySQL
+ENV MYSQL_ROOT_PASSWORD=root \
+    MYSQL_DATABASE=mydb \
+    MYSQL_USER=myuser \
+    MYSQL_PASSWORD=mypassword

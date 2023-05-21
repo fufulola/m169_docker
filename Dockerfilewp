@@ -1,34 +1,47 @@
-# Start from scratch
+# Démarrez from scratch
 FROM scratch
 
-# Add the base Alpine image
+# Rajoutez l'image de base Alpine
 ADD sources/alpine-minirootfs-3.15.2-x86_64.tar.gz /
 
-# Install necessary packages
+# Installez les packages nécessaires
 RUN apk update && \
     apk add --no-cache apache2 php7-apache2 php7-mysqli php7-json php7-curl php7-openssl php7-session && \
     rm -rf /var/cache/apk/*
 
-# Configure Apache
+# Configurez Apache
 RUN sed -i 's/#LoadModule\ rewrite_module/LoadModule\ rewrite_module/' /etc/apache2/httpd.conf && \
     sed -i 's#^DocumentRoot ".*#DocumentRoot "/var/www/html"#' /etc/apache2/httpd.conf && \
     sed -i 's#^<Directory "/var/www/localhost/htdocs">#<Directory "/var/www/html">#' /etc/apache2/httpd.conf
 
-# Copy WordPress files
+# Supprimez le fichier wp-config.php existant s'il existe
+RUN rm -f /var/www/html/wp-config.php
+
+# Copiez les fichiers WordPress
 COPY wordpress /var/www/html
 
-# Set the ownership and permissions
+RUN wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
+    && chmod +x wp-cli.phar \
+    && mv wp-cli.phar /usr/local/bin/wp
+
+COPY config/site.xml /var/www/html/wp-content/site.xml
+RUN wp import /var/www/html/wp-content/site.xml --authors=create
+
+# Copiez votre fichier wp-config.php personnalisé
+COPY config/wp-config.php /var/www/html/wp-config.php
+
+# Modifiez l'appartenance et les permissions
 RUN chown -R apache:apache /var/www/html && \
     chmod -R 755 /var/www/html
 
-# Set up MySQL connection
+# Mettez en place la connexion MySQL
 ENV WORDPRESS_DB_HOST=mysql \
     WORDPRESS_DB_NAME=wordpress \
     WORDPRESS_DB_USER=wordpress \
     WORDPRESS_DB_PASSWORD=wordpress
 
-# Expose the Apache port
+# Exposez le port Apache
 EXPOSE 80
 
-# Start Apache service
+# Démarrez le service Apache
 CMD ["/usr/sbin/httpd", "-D", "FOREGROUND"]
